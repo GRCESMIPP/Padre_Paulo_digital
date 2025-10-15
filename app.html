@@ -1,0 +1,2730 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOCIDADE DIGITAL - Sistema de Gestão de Sócios</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --verde-escuro: #24442B;
+            --branco: #dcdad1;
+            --dourado-escuro: #806237;
+            --dourado-claro: #c4ab71;
+            --verde-claro: #c6d2c9;
+            --cinza: #6c757d;
+            --vermelho: #dc3545;
+            --verde: #28a745;
+            --amarelo: #ffc107;
+            --azul: #007bff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        /* Header */
+        header {
+            background-color: var(--verde-escuro);
+            color: var(--branco);
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .logo span {
+            color: var(--dourado-claro);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        nav a {
+            color: var(--branco);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        
+        nav a:hover {
+            color: var(--dourado-claro);
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 30px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.875rem;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--dourado-claro);
+            color: var(--dourado-claro);
+        }
+        
+        .btn-primary {
+            background-color: var(--dourado-claro);
+            color: var(--verde-escuro);
+        }
+        
+        .btn-success {
+            background-color: var(--verde);
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: var(--vermelho);
+            color: white;
+        }
+        
+        .btn-warning {
+            background-color: var(--amarelo);
+            color: #212529;
+        }
+        
+        .btn-secondary {
+            background-color: var(--cinza);
+            color: white;
+        }
+        
+        .btn-info {
+            background-color: var(--azul);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Main Content */
+        .main-content {
+            display: none;
+            flex: 1;
+            padding: 30px 0;
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .active {
+            display: block;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #dee2e6;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .page-title {
+            color: var(--verde-escuro);
+            font-size: 1.8rem;
+        }
+        
+        /* Cards */
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .card-title {
+            color: var(--verde-escuro);
+            font-size: 1.2rem;
+        }
+        
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+            width: 100%;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+        
+        .table th, .table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .table th {
+            background-color: var(--verde-claro);
+            color: var(--verde-escuro);
+            font-weight: 600;
+        }
+        
+        .table tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-adimplente {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-inadimplente {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-pendente {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-remido {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+        
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--verde-escuro);
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--dourado-claro);
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        /* Grid */
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -10px;
+        }
+        
+        .col {
+            flex: 1;
+            padding: 0 10px;
+            min-width: 300px;
+        }
+        
+        .col-4 {
+            flex: 0 0 33.333333%;
+            max-width: 33.333333%;
+            padding: 0 10px;
+        }
+        
+        .col-6 {
+            flex: 0 0 50%;
+            max-width: 50%;
+            padding: 0 10px;
+        }
+        
+        .col-8 {
+            flex: 0 0 66.666667%;
+            max-width: 66.666667%;
+            padding: 0 10px;
+        }
+        
+        /* Carteirinha */
+        .carteirinha {
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            max-width: 350px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .carteirinha::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .carteirinha.adimplente {
+            background: linear-gradient(135deg, var(--verde-escuro), #1a331f);
+        }
+        
+        .carteirinha.inadimplente {
+            background: linear-gradient(135deg, #6c757d, #495057);
+        }
+        
+        .carteirinha.remido {
+            background: linear-gradient(135deg, var(--dourado-escuro), #6b522f);
+        }
+        
+        .carteirinha.pendente {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+        }
+        
+        .carteirinha-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .carteirinha-logo {
+            font-size: 2rem;
+        }
+        
+        .carteirinha-foto {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid white;
+            margin: 0 auto 15px;
+            overflow: hidden;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .carteirinha-foto img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .carteirinha-foto .placeholder {
+            color: var(--verde-escuro);
+            font-size: 2rem;
+        }
+        
+        .carteirinha-nome {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .carteirinha-info {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .carteirinha-watermark {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 0.7rem;
+            opacity: 0.5;
+        }
+        
+        /* QR Code */
+        .qrcode-container {
+            text-align: center;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        #qrcode {
+            display: inline-block;
+            margin: 15px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* Dashboard */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            border-left: 4px solid var(--verde-escuro);
+        }
+        
+        .stat-card.adimplente {
+            border-left-color: var(--verde);
+        }
+        
+        .stat-card.inadimplente {
+            border-left-color: var(--vermelho);
+        }
+        
+        .stat-card.pendente {
+            border-left-color: var(--amarelo);
+        }
+        
+        .stat-card.remido {
+            border-left-color: var(--dourado-escuro);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--verde-escuro);
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            color: var(--cinza);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-lg {
+            max-width: 800px;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .modal-header h2 {
+            color: var(--verde-escuro);
+            margin: 0;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dourado-escuro);
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            border-bottom: 3px solid var(--dourado-claro);
+            color: var(--verde-escuro);
+            font-weight: 600;
+        }
+        
+        .tab:hover:not(.active) {
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 1100;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            max-width: 400px;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background-color: var(--verde);
+        }
+        
+        .notification.error {
+            background-color: var(--vermelho);
+        }
+        
+        .notification.warning {
+            background-color: var(--amarelo);
+            color: #212529;
+        }
+        
+        .notification.info {
+            background-color: var(--cinza);
+        }
+        
+        /* File Upload */
+        .file-upload {
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .file-upload:hover {
+            border-color: var(--dourado-claro);
+            background-color: rgba(196, 171, 113, 0.05);
+        }
+        
+        .file-upload i {
+            font-size: 3rem;
+            color: var(--cinza);
+            margin-bottom: 15px;
+        }
+        
+        .file-upload.dragover {
+            border-color: var(--verde-escuro);
+            background-color: rgba(36, 68, 43, 0.05);
+        }
+        
+        /* Photo Upload */
+        .photo-upload {
+            width: 150px;
+            height: 150px;
+            border: 2px dashed #ddd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .photo-upload:hover {
+            border-color: var(--dourado-claro);
+        }
+        
+        .photo-upload img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .photo-upload .placeholder {
+            color: var(--cinza);
+            text-align: center;
+        }
+        
+        .photo-upload input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--verde-escuro);
+            color: var(--branco);
+            padding: 30px 0 15px;
+            margin-top: auto;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .footer-column h3 {
+            color: var(--dourado-claro);
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+        
+        .footer-column ul {
+            list-style: none;
+        }
+        
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-column a {
+            color: var(--branco);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-column a:hover {
+            color: var(--dourado-claro);
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+        
+        .social-links a:hover {
+            background-color: var(--dourado-claro);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            color: var(--verde-claro);
+        }
+        
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--branco);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .col-4, .col-6, .col-8 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                width: 100%;
+                display: none;
+            }
+            
+            nav ul.show {
+                display: flex;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .auth-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                border-bottom: none;
+                border-left: 3px solid transparent;
+            }
+            
+            .tab.active {
+                border-bottom: none;
+                border-left: 3px solid var(--dourado-claro);
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .form-row .form-group {
+                min-width: 100%;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .container {
+                padding: 0 10px;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .auth-buttons {
+                flex-direction: column;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .carteirinha {
+                max-width: 100%;
+            }
+            
+            .modal-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                    <div class="logo">
+                        <i class="fas fa-crown" style="font-size: 2rem; color: var(--dourado-claro);"></i>
+                        <h1>MOCIDADE <span>DIGITAL</span></h1>
+                    </div>
+                    <button class="mobile-menu-btn" id="mobileMenuBtn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+                
+                <nav>
+                    <ul id="navMenu">
+                        <li><a href="#" data-page="home">Início</a></li>
+                        <li><a href="#" data-page="socioArea" class="socio-only">Área do Sócio</a></li>
+                        <li><a href="#" data-page="adminDashboard" class="admin-only">Painel Admin</a></li>
+                        <li><a href="#" data-page="about">Sobre</a></li>
+                    </ul>
+                </nav>
+                
+                <div class="auth-buttons" id="authButtons">
+                    <button class="btn btn-outline" id="loginBtn"><i class="fas fa-user"></i> Área do Sócio</button>
+                    <button class="btn btn-primary" id="adminBtn"><i class="fas fa-lock"></i> Área Administrativa</button>
+                </div>
+                <div class="user-menu" id="userMenu" style="display: none;">
+                    <span id="userName" style="margin-right: 10px;"></span>
+                    <button class="btn btn-outline" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Sair</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Notifications -->
+    <div id="notificationArea"></div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Página Inicial -->
+        <div class="page active" id="home">
+            <div class="container">
+                <div class="hero" style="background: linear-gradient(rgba(36, 68, 43, 0.8), rgba(36, 68, 43, 0.9)); color: white; padding: 60px 0; text-align: center; border-radius: 10px; margin-bottom: 40px;">
+                    <h2 style="font-size: 2rem; margin-bottom: 20px;">Bem-vindo ao Sistema de Gestão de Sócios</h2>
+                    <p style="font-size: 1.1rem; max-width: 700px; margin: 0 auto 30px;">Uma plataforma digital completa para a G.R.C.E.S. Mocidade Independente do Padre Paulo</p>
+                    <div class="hero-buttons" style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                        <button class="btn btn-primary" id="heroSocioBtn"><i class="fas fa-user"></i> Área do Sócio</button>
+                        <button class="btn btn-outline" id="heroAdminBtn"><i class="fas fa-lock"></i> Área Administrativa</button>
+                    </div>
+                </div>
+
+                <div class="section-title" style="text-align: center; margin-bottom: 50px;">
+                    <h2 style="font-size: 1.8rem; color: var(--verde-escuro); margin-bottom: 10px;">Funcionalidades do Sistema</h2>
+                    <p style="color: var(--dourado-escuro); max-width: 600px; margin: 0 auto;">Conheça as principais funcionalidades da plataforma Mocidade Digital</p>
+                </div>
+
+                <div class="features-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px;">
+                    <div class="feature-card" style="background-color: white; border-radius: 10px; padding: 25px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); transition: transform 0.3s; text-align: center;">
+                        <div class="feature-icon" style="background-color: var(--verde-claro); width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: var(--verde-escuro); font-size: 1.8rem;">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3 style="color: var(--verde-escuro); margin-bottom: 15px;">Gestão de Sócios</h3>
+                        <p>Cadastro, aprovação e controle completo de sócios com status de adimplência.</p>
+                    </div>
+                    <div class="feature-card" style="background-color: white; border-radius: 10px; padding: 25px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); transition: transform 0.3s; text-align: center;">
+                        <div class="feature-icon" style="background-color: var(--verde-claro); width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: var(--verde-escuro); font-size: 1.8rem;">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <h3 style="color: var(--verde-escuro); margin-bottom: 15px;">Controle de Mensalidades</h3>
+                        <p>Sistema completo para controle de pagamentos com integração PIX.</p>
+                    </div>
+                    <div class="feature-card" style="background-color: white; border-radius: 10px; padding: 25px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); transition: transform 0.3s; text-align: center;">
+                        <div class="feature-icon" style="background-color: var(--verde-claro); width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: var(--verde-escuro); font-size: 1.8rem;">
+                            <i class="fas fa-id-card"></i>
+                        </div>
+                        <h3 style="color: var(--verde-escuro); margin-bottom: 15px;">Carteirinha Digital</h3>
+                        <p>Carteirinha virtual com cores diferenciadas por status de adimplência.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Área do Sócio -->
+        <div class="page" id="socioArea">
+            <div class="container">
+                <div class="page-header">
+                    <h2 class="page-title">Área do Sócio</h2>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" id="editProfileBtn"><i class="fas fa-edit"></i> Editar Perfil</button>
+                        <button class="btn btn-secondary" id="downloadCardBtn"><i class="fas fa-download"></i> Baixar Carteirinha</button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Minha Carteirinha</h3>
+                                <button class="btn btn-sm btn-outline" id="refreshCardBtn"><i class="fas fa-sync-alt"></i></button>
+                            </div>
+                            <div class="carteirinha adimplente" id="carteirinha">
+                                <div class="carteirinha-header">
+                                    <div class="carteirinha-logo">
+                                        <i class="fas fa-crown"></i>
+                                    </div>
+                                    <div class="carteirinha-status">
+                                        <span class="status-badge status-adimplente">ADIMPLENTE</span>
+                                    </div>
+                                </div>
+                                <div class="carteirinha-foto">
+                                    <img src="" alt="Foto do Sócio" id="memberPhoto" style="display: none;">
+                                    <div class="placeholder" id="photoPlaceholder">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                </div>
+                                <div class="carteirinha-nome" id="memberName">João Silva</div>
+                                <div class="carteirinha-info">
+                                    <div>CPF: <span id="memberCPF">123.456.789-00</span></div>
+                                    <div>Desde: <span id="memberSince">2020</span></div>
+                                    <div>Cargo: <span id="memberRole">Sócio</span></div>
+                                </div>
+                                <div class="carteirinha-watermark">MOCIDADE DIGITAL</div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Informações de Contato</h3>
+                            </div>
+                            <div class="contact-info">
+                                <p><strong>Secretaria:</strong> <span id="contactWhatsAppNumber">(13) 9.9757-1666</span></p>
+                                <p><strong>Email:</strong> contato@mocidadedigital.com</p>
+                                <p><strong>Endereço:</strong> Padre Paulo, Santos - SP</p>
+                                <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <button class="btn btn-sm btn-primary" id="contactWhatsApp"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                                    <button class="btn btn-sm btn-outline" id="contactEmail"><i class="fas fa-envelope"></i> Email</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Minhas Mensalidades</h3>
+                                <div>
+                                    <button class="btn btn-sm btn-outline" id="duesHistoryBtn"><i class="fas fa-history"></i> Histórico</button>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Mês/Ano</th>
+                                            <th>Valor</th>
+                                            <th>Vencimento</th>
+                                            <th>Status</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="duesTable">
+                                        <!-- Dados preenchidos via JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Pagamento via PIX</h3>
+                                <div>
+                                    <button class="btn btn-sm btn-outline" id="copyPixBtn"><i class="fas fa-copy"></i> Copiar PIX</button>
+                                </div>
+                            </div>
+                            <div class="qrcode-container">
+                                <p>Escaneie o QR Code abaixo para pagar sua mensalidade:</p>
+                                <div id="qrcode"></div>
+                                <p style="margin: 15px 0;">Ou copie o código PIX:</p>
+                                <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0; word-break: break-all; font-family: monospace;" id="pixKeyDisplay">
+                                    55.674.196/0001-91
+                                </div>
+                                <p>Após o pagamento, envie o comprovante para:<br>
+                                <strong>WhatsApp: <span id="whatsappNumberDisplay">(13) 9.9757-1666</span></strong></p>
+                                <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <button class="btn btn-success" id="confirmPaymentBtn"><i class="fas fa-check-circle"></i> Já enviei o comprovante</button>
+                                    <button class="btn btn-outline" id="helpPaymentBtn"><i class="fas fa-question-circle"></i> Ajuda com Pagamento</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Painel Administrativo -->
+        <div class="page" id="adminDashboard">
+            <div class="container">
+                <div class="page-header">
+                    <h2 class="page-title">Painel Administrativo</h2>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" id="addMemberBtn"><i class="fas fa-user-plus"></i> Adicionar Sócio</button>
+                        <button class="btn btn-secondary" id="importBtn"><i class="fas fa-file-import"></i> Importar Planilha</button>
+                        <button class="btn btn-warning" id="sendRemindersBtn"><i class="fas fa-bell"></i> Enviar Lembretes</button>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total de Sócios</div>
+                        <div class="stat-value" id="totalMembers">0</div>
+                        <div><i class="fas fa-users"></i></div>
+                    </div>
+                    <div class="stat-card adimplente">
+                        <div class="stat-label">Sócios Adimplentes</div>
+                        <div class="stat-value" id="activeMembers">0</div>
+                        <div><i class="fas fa-check-circle"></i></div>
+                    </div>
+                    <div class="stat-card inadimplente">
+                        <div class="stat-label">Sócios Inadimplentes</div>
+                        <div class="stat-value" id="overdueMembers">0</div>
+                        <div><i class="fas fa-exclamation-circle"></i></div>
+                    </div>
+                    <div class="stat-card pendente">
+                        <div class="stat-label">Cadastros Pendentes</div>
+                        <div class="stat-value" id="pendingMembers">0</div>
+                        <div><i class="fas fa-clock"></i></div>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <div class="tab active" data-tab="members">Todos os Sócios</div>
+                    <div class="tab" data-tab="pending">Cadastros Pendentes</div>
+                    <div class="tab" data-tab="overdue">Inadimplentes</div>
+                    <div class="tab" data-tab="reports">Relatórios</div>
+                    <div class="tab" data-tab="settings">Configurações</div>
+                </div>
+
+                <div class="tab-content active" id="membersTab">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Lista de Sócios</h3>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <input type="text" class="form-control" style="width: 200px;" placeholder="Buscar sócio..." id="searchMember">
+                                <select class="form-control" style="width: 150px;" id="filterStatus">
+                                    <option value="">Todos status</option>
+                                    <option value="adimplente">Adimplente</option>
+                                    <option value="inadimplente">Inadimplente</option>
+                                    <option value="pendente">Pendente</option>
+                                    <option value="remido">Remido</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>CPF</th>
+                                        <th>Status</th>
+                                        <th>Último Pagamento</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="membersTable">
+                                    <!-- Dados preenchidos via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="pendingTab">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Cadastros Pendentes de Aprovação</h3>
+                            <div>
+                                <button class="btn btn-sm btn-success" id="approveAllBtn"><i class="fas fa-check-double"></i> Aprovar Todos</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>CPF</th>
+                                        <th>Data de Cadastro</th>
+                                        <th>Contato</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pendingTable">
+                                    <!-- Dados preenchidos via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="overdueTab">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Sócios Inadimplentes</h3>
+                            <div>
+                                <button class="btn btn-sm btn-warning" id="sendRemindersOverdueBtn"><i class="fas fa-bell"></i> Enviar Lembretes</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>CPF</th>
+                                        <th>Meses em Atraso</th>
+                                        <th>Valor Devido</th>
+                                        <th>Último Contato</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="overdueTable">
+                                    <!-- Dados preenchidos via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="reportsTab">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Relatórios</h3>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Tipo de Relatório</label>
+                                <select class="form-control" id="reportType">
+                                    <option value="voting">Sócios Aptos a Votar</option>
+                                    <option value="all">Todos os Sócios</option>
+                                    <option value="active">Sócios Adimplentes</option>
+                                    <option value="overdue">Sócios Inadimplentes</option>
+                                    <option value="pending">Cadastros Pendentes</option>
+                                    <option value="financial">Financeiro</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Formato de Exportação</label>
+                                <select class="form-control" id="exportFormat">
+                                    <option value="pdf">PDF</option>
+                                    <option value="excel">Excel</option>
+                                    <option value="csv">CSV</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Data Inicial</label>
+                                <input type="date" class="form-control" id="startDate">
+                            </div>
+                            <div class="form-group">
+                                <label>Data Final</label>
+                                <input type="date" class="form-control" id="endDate">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" id="generateReportBtn"><i class="fas fa-chart-bar"></i> Gerar Relatório</button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Estatísticas de Adimplência</h3>
+                        </div>
+                        <div style="height: 300px;">
+                            <canvas id="complianceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="settingsTab">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Configurações do Sistema</h3>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Valor da Mensalidade (R$)</label>
+                                <input type="number" class="form-control" id="monthlyDueValue" value="50.00" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label>Dia de Vencimento</label>
+                                <input type="number" class="form-control" id="dueDateDay" min="1" max="31" value="10">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Chave PIX</label>
+                            <input type="text" class="form-control" id="pixKey" value="55.674.196/0001-91">
+                        </div>
+                        <div class="form-group">
+                            <label>Número do WhatsApp para Comprovantes</label>
+                            <input type="text" class="form-control" id="whatsappNumber" value="(13) 9.9757-1666">
+                        </div>
+                        <button class="btn btn-primary" id="saveSettingsBtn"><i class="fas fa-save"></i> Salvar Configurações</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sobre -->
+        <div class="page" id="about">
+            <div class="container">
+                <div class="page-header">
+                    <h2 class="page-title">Sobre o Sistema</h2>
+                </div>
+                <div class="card">
+                    <h3>MOCIDADE DIGITAL - Sistema de Gestão de Sócios</h3>
+                    <p>Este sistema foi desenvolvido para a G.R.C.E.S. Mocidade Independente do Padre Paulo com o objetivo de modernizar e digitalizar a gestão de sócios e mensalidades.</p>
+                    
+                    <h4>Funcionalidades Principais:</h4>
+                    <ul>
+                        <li>Cadastro e gestão completa de sócios</li>
+                        <li>Controle de mensalidades com status de adimplência</li>
+                        <li>Pagamento via PIX com QR Code</li>
+                        <li>Carteirinha digital para sócios</li>
+                        <li>Painel administrativo completo</li>
+                        <li>Relatórios e exportação de dados</li>
+                        <li>Sistema de notificações e lembretes</li>
+                    </ul>
+                    
+                    <h4>Contato:</h4>
+                    <p>Em caso de dúvidas ou problemas, entre em contato com a secretaria:</p>
+                    <p><strong>WhatsApp:</strong> (13) 9.9757-1666</p>
+                    <p><strong>Email:</strong> contato@mocidadedigital.com</p>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background-color: var(--verde-claro); border-radius: 5px;">
+                        <h5>Versão do Sistema: 3.0.0</h5>
+                        <p>Última atualização: Novembro 2023</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Área do Sócio</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="cpf">CPF</label>
+                    <input type="text" id="cpf" class="form-control" placeholder="Digite seu CPF" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" class="form-control" placeholder="Digite sua senha" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-sign-in-alt"></i> Entrar</button>
+                <div class="form-footer" style="margin-top: 20px; text-align: center;">
+                    <p>Não tem cadastro? <a href="#" id="registerLink">Cadastre-se aqui</a></p>
+                    <p><a href="#" id="forgotPasswordLink">Esqueci minha senha</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div class="modal" id="adminModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Área Administrativa</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="adminForm">
+                <div class="form-group">
+                    <label for="adminUser">Usuário</label>
+                    <input type="text" id="adminUser" class="form-control" placeholder="Digite seu usuário" required>
+                </div>
+                <div class="form-group">
+                    <label for="adminPassword">Senha</label>
+                    <input type="password" id="adminPassword" class="form-control" placeholder="Digite sua senha" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-sign-in-alt"></i> Entrar</button>
+                <div class="form-footer" style="margin-top: 20px; text-align: center;">
+                    <p><a href="#" id="adminForgotPassword">Esqueci minha senha</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Cadastro Modal -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2>Cadastro de Novo Sócio</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>Foto (Opcional)</label>
+                    <div class="photo-upload">
+                        <div class="placeholder">
+                            <i class="fas fa-camera"></i>
+                            <div>Clique para adicionar foto</div>
+                        </div>
+                        <img id="photoPreview" style="display: none;">
+                        <input type="file" id="photoInput" accept="image/*">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="registerName">Nome Completo *</label>
+                        <input type="text" id="registerName" class="form-control" placeholder="Digite seu nome completo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerCpf">CPF *</label>
+                        <input type="text" id="registerCpf" class="form-control" placeholder="000.000.000-00" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="registerBirthDate">Data de Nascimento *</label>
+                        <input type="date" id="registerBirthDate" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPhone">Telefone *</label>
+                        <input type="tel" id="registerPhone" class="form-control" placeholder="(00) 00000-0000" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerEmail">Email *</label>
+                    <input type="email" id="registerEmail" class="form-control" placeholder="seu@email.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerAddress">Endereço Completo *</label>
+                    <input type="text" id="registerAddress" class="form-control" placeholder="Rua, número, bairro, cidade - Estado" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="registerInstagram">Instagram (Opcional)</label>
+                        <input type="text" id="registerInstagram" class="form-control" placeholder="@seuinstagram">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerFacebook">Facebook (Opcional)</label>
+                        <input type="text" id="registerFacebook" class="form-control" placeholder="Seu perfil do Facebook">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="registerPassword">Senha *</label>
+                        <input type="password" id="registerPassword" class="form-control" placeholder="Crie uma senha" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerConfirmPassword">Confirmar Senha *</label>
+                        <input type="password" id="registerConfirmPassword" class="form-control" placeholder="Confirme sua senha" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fas fa-user-plus"></i> Cadastrar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div class="modal" id="importModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Importar Planilha de Sócios</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="file-upload" id="fileUploadArea">
+                <i class="fas fa-file-excel"></i>
+                <h4>Arraste e solte sua planilha aqui</h4>
+                <p>ou clique para selecionar</p>
+                <p style="font-size: 0.8rem; color: var(--cinza); margin-top: 10px;">
+                    Formatos suportados: .xlsx, .xls, .csv
+                </p>
+                <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display: none;">
+            </div>
+            <div id="filePreview" style="display: none; margin-top: 20px;">
+                <h4>Pré-visualização dos dados</h4>
+                <div class="table-responsive">
+                    <table class="table" id="previewTable">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>CPF</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dados da planilha -->
+                        </tbody>
+                    </table>
+                </div>
+                <button class="btn btn-success" id="confirmImportBtn" style="width: 100%; margin-top: 20px;">
+                    <i class="fas fa-check"></i> Confirmar Importação
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>MOCIDADE DIGITAL</h3>
+                    <p>Sistema de Gestão de Sócios da G.R.C.E.S. Mocidade Independente do Padre Paulo.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>Links Rápidos</h3>
+                    <ul>
+                        <li><a href="#" data-page="home">Início</a></li>
+                        <li><a href="#" data-page="about">Sobre</a></li>
+                        <li><a href="#" data-page="socioArea" class="socio-only">Área do Sócio</a></li>
+                        <li><a href="#" data-page="adminDashboard" class="admin-only">Painel Admin</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Contato</h3>
+                    <ul>
+                        <li><i class="fas fa-phone"></i> (13) 9.9757-1666</li>
+                        <li><i class="fas fa-envelope"></i> contato@mocidadedigital.com</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Padre Paulo, Santos - SP</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 MOCIDADE DIGITAL - Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Dados de exemplo para demonstração
+        const sampleMembers = [
+            {
+                id: 1,
+                name: "João Silva",
+                cpf: "123.456.789-00",
+                email: "joao.silva@email.com",
+                phone: "(11) 99999-9999",
+                birthDate: "1985-05-15",
+                address: "Rua das Flores, 123 - Centro - Santos/SP",
+                instagram: "@joaosilva",
+                facebook: "joao.silva",
+                status: "adimplente",
+                since: "2020",
+                role: "Sócio",
+                password: "123456",
+                photo: null,
+                dues: [
+                    { month: "01/2023", value: 50.00, dueDate: "10/01/2023", status: "pago" },
+                    { month: "02/2023", value: 50.00, dueDate: "10/02/2023", status: "pago" },
+                    { month: "03/2023", value: 50.00, dueDate: "10/03/2023", status: "pago" },
+                    { month: "04/2023", value: 50.00, dueDate: "10/04/2023", status: "pendente" }
+                ]
+            },
+            {
+                id: 2,
+                name: "Maria Santos",
+                cpf: "987.654.321-00",
+                email: "maria.santos@email.com",
+                phone: "(11) 98888-8888",
+                birthDate: "1990-08-22",
+                address: "Av. Principal, 456 - Vila Mathias - Santos/SP",
+                instagram: "@mariasantos",
+                facebook: "maria.santos",
+                status: "inadimplente",
+                since: "2021",
+                role: "Sócio",
+                password: "123456",
+                photo: null,
+                dues: [
+                    { month: "01/2023", value: 50.00, dueDate: "10/01/2023", status: "pago" },
+                    { month: "02/2023", value: 50.00, dueDate: "10/02/2023", status: "atrasado" },
+                    { month: "03/2023", value: 50.00, dueDate: "10/03/2023", status: "atrasado" }
+                ]
+            },
+            {
+                id: 3,
+                name: "Pedro Oliveira",
+                cpf: "456.789.123-00",
+                email: "pedro.oliveira@email.com",
+                phone: "(11) 97777-7777",
+                birthDate: "1995-12-10",
+                address: "Rua Nova, 789 - Pompeia - Santos/SP",
+                instagram: "@pedrooliveira",
+                facebook: "pedro.oliveira",
+                status: "pendente",
+                since: "2023",
+                role: "Sócio",
+                password: "123456",
+                photo: null,
+                dues: []
+            },
+            {
+                id: 4,
+                name: "Ana Costa",
+                cpf: "321.654.987-00",
+                email: "ana.costa@email.com",
+                phone: "(11) 96666-6666",
+                birthDate: "1988-03-30",
+                address: "Alameda das Árvores, 321 - Embaré - Santos/SP",
+                instagram: "@anacosta",
+                facebook: "ana.costa",
+                status: "remido",
+                since: "2019",
+                role: "Sócio Remido",
+                password: "123456",
+                photo: null,
+                dues: []
+            }
+        ];
+
+        const sampleAdmins = [
+            { username: "admin", password: "admin123", name: "Administrador", role: "Administrador" },
+            { username: "secretaria", password: "secretaria123", name: "Secretária", role: "Secretaria" },
+            { username: "tesoureiro", password: "tesoureiro123", name: "Tesoureiro", role: "Tesouraria" }
+        ];
+
+        // Estado da aplicação
+        let currentUser = null;
+        let isAdmin = false;
+        let members = JSON.parse(localStorage.getItem('members')) || sampleMembers;
+        let admins = JSON.parse(localStorage.getItem('admins')) || sampleAdmins;
+        let systemSettings = JSON.parse(localStorage.getItem('systemSettings')) || {
+            monthlyDueValue: 50.00,
+            dueDateDay: 10,
+            pixKey: "55.674.196/0001-91",
+            whatsappNumber: "(13) 9.9757-1666"
+        };
+
+        // Dados temporários para importação
+        let importData = [];
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            setupEventListeners();
+            updateMembersTable();
+            updatePendingTable();
+            updateOverdueTable();
+            updateStats();
+            initializeChart();
+            loadSettings();
+            updateContactInfo();
+        });
+
+        function initializeApp() {
+            // Verificar se há usuário logado
+            const savedUser = localStorage.getItem('currentUser');
+            const savedIsAdmin = localStorage.getItem('isAdmin');
+            
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                isAdmin = savedIsAdmin === 'true';
+                showAuthenticatedUI();
+                
+                if (isAdmin) {
+                    showPage('adminDashboard');
+                } else {
+                    showPage('socioArea');
+                    updateMemberUI();
+                }
+            } else {
+                showPage('home');
+                document.getElementById('mainContent').style.display = 'block';
+            }
+        }
+
+        function setupEventListeners() {
+            // Menu mobile
+            document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+                const navMenu = document.getElementById('navMenu');
+                navMenu.classList.toggle('show');
+            });
+
+            // Navegação
+            document.querySelectorAll('nav a, .footer-column a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const page = this.getAttribute('data-page');
+                    if (page) showPage(page);
+                    
+                    // Fechar menu mobile após clique
+                    document.getElementById('navMenu').classList.remove('show');
+                });
+            });
+
+            // Botões de login
+            document.getElementById('loginBtn').addEventListener('click', () => {
+                document.getElementById('loginModal').style.display = 'flex';
+            });
+            
+            document.getElementById('adminBtn').addEventListener('click', () => {
+                document.getElementById('adminModal').style.display = 'flex';
+            });
+            
+            document.getElementById('heroSocioBtn').addEventListener('click', () => {
+                document.getElementById('loginModal').style.display = 'flex';
+            });
+            
+            document.getElementById('heroAdminBtn').addEventListener('click', () => {
+                document.getElementById('adminModal').style.display = 'flex';
+            });
+
+            // Links de cadastro
+            document.getElementById('registerLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('loginModal').style.display = 'none';
+                document.getElementById('registerModal').style.display = 'flex';
+            });
+
+            // Fechar modais
+            document.querySelectorAll('.close-modal').forEach(button => {
+                button.addEventListener('click', function() {
+                    this.closest('.modal').style.display = 'none';
+                });
+            });
+
+            // Fechar modal ao clicar fora
+            window.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal')) {
+                    e.target.style.display = 'none';
+                }
+            });
+
+            // Formulários
+            document.getElementById('loginForm').addEventListener('submit', handleMemberLogin);
+            document.getElementById('adminForm').addEventListener('submit', handleAdminLogin);
+            document.getElementById('registerForm').addEventListener('submit', handleRegister);
+
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+
+            // Tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    switchTab(tabId);
+                });
+            });
+
+            // Botões de ação
+            document.getElementById('confirmPaymentBtn').addEventListener('click', confirmPayment);
+            document.getElementById('generateReportBtn').addEventListener('click', generateReport);
+            document.getElementById('editProfileBtn').addEventListener('click', editProfile);
+            document.getElementById('addMemberBtn').addEventListener('click', addMember);
+            document.getElementById('importBtn').addEventListener('click', importSpreadsheet);
+            document.getElementById('downloadCardBtn').addEventListener('click', downloadCard);
+            document.getElementById('refreshCardBtn').addEventListener('click', refreshCard);
+            document.getElementById('copyPixBtn').addEventListener('click', copyPix);
+            document.getElementById('contactWhatsApp').addEventListener('click', contactWhatsApp);
+            document.getElementById('contactEmail').addEventListener('click', contactEmail);
+            document.getElementById('duesHistoryBtn').addEventListener('click', showDuesHistory);
+            document.getElementById('helpPaymentBtn').addEventListener('click', helpPayment);
+            document.getElementById('sendRemindersBtn').addEventListener('click', sendReminders);
+            document.getElementById('sendRemindersOverdueBtn').addEventListener('click', sendRemindersOverdue);
+            document.getElementById('approveAllBtn').addEventListener('click', approveAllPending);
+            document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
+
+            // Upload de foto
+            document.getElementById('photoInput').addEventListener('change', handlePhotoUpload);
+
+            // Upload de arquivo
+            document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+            document.getElementById('fileUploadArea').addEventListener('click', () => {
+                document.getElementById('fileInput').click();
+            });
+
+            // Drag and drop para upload
+            setupDragAndDrop();
+
+            // Confirmar importação
+            document.getElementById('confirmImportBtn').addEventListener('click', confirmImport);
+
+            // Busca
+            document.getElementById('searchMember').addEventListener('input', filterMembers);
+            document.getElementById('filterStatus').addEventListener('change', filterMembers);
+        }
+
+        function showPage(pageId) {
+            // Esconder todas as páginas
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Mostrar a página solicitada
+            document.getElementById(pageId).classList.add('active');
+            
+            // Mostrar conteúdo principal
+            document.getElementById('mainContent').style.display = 'block';
+        }
+
+        function showAuthenticatedUI() {
+            document.getElementById('authButtons').style.display = 'none';
+            document.getElementById('userMenu').style.display = 'flex';
+            document.getElementById('userName').textContent = currentUser.name;
+            
+            // Mostrar/ocultar links baseados no tipo de usuário
+            document.querySelectorAll('.socio-only').forEach(el => {
+                el.style.display = isAdmin ? 'none' : 'inline';
+            });
+            
+            document.querySelectorAll('.admin-only').forEach(el => {
+                el.style.display = isAdmin ? 'inline' : 'none';
+            });
+        }
+
+        function showUnauthenticatedUI() {
+            document.getElementById('authButtons').style.display = 'flex';
+            document.getElementById('userMenu').style.display = 'none';
+            
+            // Resetar visibilidade dos links
+            document.querySelectorAll('.socio-only, .admin-only').forEach(el => {
+                el.style.display = 'none';
+            });
+        }
+
+        function handleMemberLogin(e) {
+            e.preventDefault();
+            const cpf = document.getElementById('cpf').value;
+            const password = document.getElementById('password').value;
+            
+            // Em uma aplicação real, isso seria uma chamada de API
+            const member = members.find(m => m.cpf === cpf && m.password === password);
+            
+            if (member && member.status !== 'pendente') {
+                currentUser = member;
+                isAdmin = false;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                localStorage.setItem('isAdmin', 'false');
+                
+                document.getElementById('loginModal').style.display = 'none';
+                showAuthenticatedUI();
+                showPage('socioArea');
+                updateMemberUI();
+                showNotification('Login realizado com sucesso!', 'success');
+            } else {
+                showNotification('CPF ou senha incorretos, ou cadastro pendente de aprovação.', 'error');
+            }
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('adminUser').value;
+            const password = document.getElementById('adminPassword').value;
+            
+            // Em uma aplicação real, isso seria uma chamada de API
+            const admin = admins.find(a => a.username === username && a.password === password);
+            
+            if (admin) {
+                currentUser = admin;
+                isAdmin = true;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                localStorage.setItem('isAdmin', 'true');
+                
+                document.getElementById('adminModal').style.display = 'none';
+                showAuthenticatedUI();
+                showPage('adminDashboard');
+                showNotification('Login administrativo realizado!', 'success');
+            } else {
+                showNotification('Usuário ou senha incorretos.', 'error');
+            }
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('registerName').value;
+            const cpf = document.getElementById('registerCpf').value;
+            const birthDate = document.getElementById('registerBirthDate').value;
+            const phone = document.getElementById('registerPhone').value;
+            const email = document.getElementById('registerEmail').value;
+            const address = document.getElementById('registerAddress').value;
+            const instagram = document.getElementById('registerInstagram').value;
+            const facebook = document.getElementById('registerFacebook').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            
+            // Validar senhas
+            if (password !== confirmPassword) {
+                showNotification('As senhas não coincidem.', 'error');
+                return;
+            }
+            
+            // Verificar se CPF já existe
+            if (members.find(m => m.cpf === cpf)) {
+                showNotification('CPF já cadastrado no sistema.', 'error');
+                return;
+            }
+            
+            // Criar novo sócio
+            const newMember = {
+                id: Math.max(...members.map(m => m.id)) + 1,
+                name,
+                cpf,
+                email,
+                phone,
+                birthDate,
+                address,
+                instagram,
+                facebook,
+                status: 'pendente',
+                since: new Date().getFullYear().toString(),
+                role: 'Sócio',
+                password,
+                photo: null,
+                dues: []
+            };
+            
+            // Adicionar foto se existir
+            const photoInput = document.getElementById('photoInput');
+            if (photoInput.files && photoInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    newMember.photo = e.target.result;
+                    members.push(newMember);
+                    localStorage.setItem('members', JSON.stringify(members));
+                    
+                    document.getElementById('registerModal').style.display = 'none';
+                    document.getElementById('registerForm').reset();
+                    document.getElementById('photoPreview').style.display = 'none';
+                    document.querySelector('.photo-upload .placeholder').style.display = 'flex';
+                    
+                    showNotification('Cadastro realizado com sucesso! Aguarde a aprovação da secretaria.', 'success');
+                };
+                reader.readAsDataURL(photoInput.files[0]);
+            } else {
+                members.push(newMember);
+                localStorage.setItem('members', JSON.stringify(members));
+                
+                document.getElementById('registerModal').style.display = 'none';
+                document.getElementById('registerForm').reset();
+                
+                showNotification('Cadastro realizado com sucesso! Aguarde a aprovação da secretaria.', 'success');
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            isAdmin = false;
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('isAdmin');
+            
+            showUnauthenticatedUI();
+            showPage('home');
+            showNotification('Logout realizado com sucesso.', 'info');
+        }
+
+        function updateMemberUI() {
+            if (!currentUser) return;
+            
+            // Atualizar informações do sócio
+            document.getElementById('memberName').textContent = currentUser.name;
+            document.getElementById('memberCPF').textContent = currentUser.cpf;
+            document.getElementById('memberSince').textContent = currentUser.since;
+            document.getElementById('memberRole').textContent = currentUser.role;
+            
+            // Atualizar foto
+            const memberPhoto = document.getElementById('memberPhoto');
+            const photoPlaceholder = document.getElementById('photoPlaceholder');
+            if (currentUser.photo) {
+                memberPhoto.src = currentUser.photo;
+                memberPhoto.style.display = 'block';
+                photoPlaceholder.style.display = 'none';
+            } else {
+                memberPhoto.style.display = 'none';
+                photoPlaceholder.style.display = 'flex';
+                photoPlaceholder.innerHTML = `<i class="fas fa-user"></i>`;
+            }
+            
+            // Atualizar status da carteirinha
+            const carteirinha = document.getElementById('carteirinha');
+            carteirinha.className = 'carteirinha';
+            carteirinha.classList.add(currentUser.status);
+            
+            const statusBadge = carteirinha.querySelector('.status-badge');
+            statusBadge.className = 'status-badge';
+            
+            if (currentUser.status === 'adimplente') {
+                statusBadge.classList.add('status-adimplente');
+                statusBadge.textContent = 'ADIMPLENTE';
+            } else if (currentUser.status === 'inadimplente') {
+                statusBadge.classList.add('status-inadimplente');
+                statusBadge.textContent = 'INADIMPLENTE';
+            } else if (currentUser.status === 'remido') {
+                statusBadge.classList.add('status-remido');
+                statusBadge.textContent = 'SÓCIO REMIDO';
+            } else {
+                statusBadge.classList.add('status-pendente');
+                statusBadge.textContent = 'PENDENTE';
+            }
+            
+            // Atualizar tabela de mensalidades
+            const duesTable = document.getElementById('duesTable');
+            duesTable.innerHTML = '';
+            
+            if (currentUser.dues && currentUser.dues.length > 0) {
+                currentUser.dues.forEach(due => {
+                    const row = document.createElement('tr');
+                    
+                    let statusClass = '';
+                    let statusText = '';
+                    
+                    if (due.status === 'pago') {
+                        statusClass = 'status-adimplente';
+                        statusText = 'Pago';
+                    } else if (due.status === 'atrasado') {
+                        statusClass = 'status-inadimplente';
+                        statusText = 'Em Atraso';
+                    } else {
+                        statusClass = 'status-pendente';
+                        statusText = 'Pendente';
+                    }
+                    
+                    row.innerHTML = `
+                        <td>${due.month}</td>
+                        <td>R$ ${due.value.toFixed(2)}</td>
+                        <td>${due.dueDate}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>
+                            ${due.status === 'pendente' ? '<button class="btn btn-primary btn-sm pagar-btn" data-month="' + due.month + '">Pagar</button>' : ''}
+                        </td>
+                    `;
+                    
+                    duesTable.appendChild(row);
+                });
+                
+                // Adicionar event listeners aos botões de pagar
+                document.querySelectorAll('.pagar-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const month = this.getAttribute('data-month');
+                        generateQRCode(month);
+                    });
+                });
+            } else {
+                duesTable.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhuma mensalidade encontrada.</td></tr>';
+            }
+            
+            // Gerar QR Code para pagamento
+            generateQRCode();
+        }
+
+        function generateQRCode(month = null) {
+            const qrcodeContainer = document.getElementById('qrcode');
+            qrcodeContainer.innerHTML = '';
+            
+            const value = month ? 
+                currentUser.dues.find(d => d.month === month).value : 
+                systemSettings.monthlyDueValue;
+            
+            const pixKey = systemSettings.pixKey;
+            const text = `Chave PIX: ${pixKey}\nValor: R$ ${value.toFixed(2)}\nBeneficiário: G.R.C.E.S. Mocidade Independente do Padre Paulo`;
+            
+            new QRCode(qrcodeContainer, {
+                text: text,
+                width: 200,
+                height: 200,
+                colorDark: "#24442B",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        function confirmPayment() {
+            if (confirm("Você confirma que já enviou o comprovante de pagamento via WhatsApp?")) {
+                showNotification("Obrigado! Sua mensalidade será confirmada após a validação pela secretaria.", "success");
+            }
+        }
+
+        function updateMembersTable() {
+            const table = document.getElementById('membersTable');
+            table.innerHTML = '';
+            
+            members.forEach(member => {
+                const row = document.createElement('tr');
+                
+                let statusClass = '';
+                let statusText = '';
+                
+                if (member.status === 'adimplente') {
+                    statusClass = 'status-adimplente';
+                    statusText = 'Adimplente';
+                } else if (member.status === 'inadimplente') {
+                    statusClass = 'status-inadimplente';
+                    statusText = 'Inadimplente';
+                } else if (member.status === 'remido') {
+                    statusClass = 'status-remido';
+                    statusText = 'Sócio Remido';
+                } else {
+                    statusClass = 'status-pendente';
+                    statusText = 'Pendente';
+                }
+                
+                const lastPayment = member.dues && member.dues.length > 0 ? 
+                    member.dues.filter(d => d.status === 'pago').pop() : 
+                    null;
+                
+                row.innerHTML = `
+                    <td>${member.name}</td>
+                    <td>${member.cpf}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>${lastPayment ? lastPayment.month : 'Nenhum'}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm view-member" data-id="${member.id}">Ver</button>
+                        <button class="btn btn-secondary btn-sm edit-member" data-id="${member.id}">Editar</button>
+                        ${member.status === 'pendente' ? 
+                            `<button class="btn btn-success btn-sm approve-member" data-id="${member.id}">Aprovar</button>` : 
+                            ''
+                        }
+                    </td>
+                `;
+                
+                table.appendChild(row);
+            });
+            
+            // Adicionar event listeners
+            document.querySelectorAll('.view-member').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const memberId = parseInt(this.getAttribute('data-id'));
+                    viewMember(memberId);
+                });
+            });
+            
+            document.querySelectorAll('.edit-member').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const memberId = parseInt(this.getAttribute('data-id'));
+                    editMember(memberId);
+                });
+            });
+            
+            document.querySelectorAll('.approve-member').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const memberId = parseInt(this.getAttribute('data-id'));
+                    approveMember(memberId);
+                });
+            });
+        }
+
+        function updatePendingTable() {
+            const table = document.getElementById('pendingTable');
+            table.innerHTML = '';
+            
+            const pendingMembers = members.filter(m => m.status === 'pendente');
+            
+            if (pendingMembers.length === 0) {
+                table.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum cadastro pendente.</td></tr>';
+                return;
+            }
+            
+            pendingMembers.forEach(member => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${member.name}</td>
+                    <td>${member.cpf}</td>
+                    <td>${member.since}</td>
+                    <td>${member.phone}</td>
+                    <td>
+                        <button class="btn btn-success btn-sm approve-member" data-id="${member.id}">Aprovar</button>
+                        <button class="btn btn-danger btn-sm reject-member" data-id="${member.id}">Reprovar</button>
+                        <button class="btn btn-primary btn-sm view-member" data-id="${member.id}">Ver</button>
+                    </td>
+                `;
+                
+                table.appendChild(row);
+            });
+            
+            // Adicionar event listeners
+            document.querySelectorAll('.approve-member').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const memberId = parseInt(this.getAttribute('data-id'));
+                    approveMember(memberId);
+                });
+            });
+            
+            document.querySelectorAll('.reject-member').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const memberId = parseInt(this.getAttribute('data-id'));
+                    rejectMember(memberId);
+                });
+            });
+            
+            document.querySelectorAll('.view-member').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const memberId = parseInt(this.getAttribute('data-id'));
+                    viewMember(memberId);
+                });
+            });
+        }
+
+        function updateOverdueTable() {
+            const table = document.getElementById('overdueTable');
+            table.innerHTML = '';
+            
+            const overdueMembers = members.filter(m => m.status === 'inadimplente');
+            
+            if (overdueMembers.length === 0) {
+                table.innerHTML = '<tr><td colspan="6" style="text-align: center;">Nenhum sócio inadimplente.</td></tr>';
+                return;
+            }
+            
+            overdueMembers.forEach(member => {
+                const overdueDues = member.dues ? member.dues.filter(d => d.status === 'atrasado') : [];
+                const totalDue = overdueDues.reduce((sum, due) => sum + due.value, 0);
+                
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${member.name}</td>
+                    <td>${member.cpf}</td>
+                    <td>${overdueDues.length}</td>
+                    <td>R$ ${totalDue.toFixed(2)}</td>
+                    <td>${new Date().toLocaleDateString()}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm view-member" data-id="${member.id}">Ver</button>
+                        <button class="btn btn-success btn-sm confirm-payment" data-id="${member.id}">Confirmar Pagamento</button>
+                        <button class="btn btn-warning btn-sm send-reminder" data-id="${member.id}">Lembrete</button>
+                    </td>
+                `;
+                
+                table.appendChild(row);
+            });
+            
+            // Adicionar event listeners
+            document.querySelectorAll('.view-member').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const memberId = parseInt(this.getAttribute('data-id'));
+                    viewMember(memberId);
+                });
+            });
+            
+            document.querySelectorAll('.confirm-payment').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const memberId = parseInt(this.getAttribute('data-id'));
+                    confirmMemberPayment(memberId);
+                });
+            });
+            
+            document.querySelectorAll('.send-reminder').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const memberId = parseInt(this.getAttribute('data-id'));
+                    sendMemberReminder(memberId);
+                });
+            });
+        }
+
+        function updateStats() {
+            const total = members.length;
+            const active = members.filter(m => m.status === 'adimplente').length;
+            const overdue = members.filter(m => m.status === 'inadimplente').length;
+            const pending = members.filter(m => m.status === 'pendente').length;
+            const remidos = members.filter(m => m.status === 'remido').length;
+            
+            document.getElementById('totalMembers').textContent = total;
+            document.getElementById('activeMembers').textContent = active;
+            document.getElementById('overdueMembers').textContent = overdue;
+            document.getElementById('pendingMembers').textContent = pending;
+        }
+
+        function switchTab(tabId) {
+            // Desativar todas as tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Ativar a tab clicada
+            document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+            
+            // Esconder todos os conteúdos
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Mostrar o conteúdo correspondente
+            document.getElementById(`${tabId}Tab`).classList.add('active');
+        }
+
+        function filterMembers() {
+            const searchTerm = document.getElementById('searchMember').value.toLowerCase();
+            const statusFilter = document.getElementById('filterStatus').value;
+            const rows = document.querySelectorAll('#membersTable tr');
+            
+            rows.forEach(row => {
+                const name = row.cells[0].textContent.toLowerCase();
+                const cpf = row.cells[1].textContent.toLowerCase();
+                const status = row.cells[2].textContent.toLowerCase();
+                
+                const matchesSearch = name.includes(searchTerm) || cpf.includes(searchTerm);
+                const matchesStatus = !statusFilter || status.includes(statusFilter);
+                
+                if (matchesSearch && matchesStatus) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function initializeChart() {
+            const ctx = document.getElementById('complianceChart').getContext('2d');
+            
+            const active = members.filter(m => m.status === 'adimplente').length;
+            const overdue = members.filter(m => m.status === 'inadimplente').length;
+            const pending = members.filter(m => m.status === 'pendente').length;
+            const remidos = members.filter(m => m.status === 'remido').length;
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Adimplentes', 'Inadimplentes', 'Pendentes', 'Remidos'],
+                    datasets: [{
+                        data: [active, overdue, pending, remidos],
+                        backgroundColor: [
+                            '#28a745',
+                            '#dc3545',
+                            '#ffc107',
+                            '#6c757d'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function viewMember(memberId) {
+            const member = members.find(m => m.id === memberId);
+            if (member) {
+                const details = `
+Nome: ${member.name}
+CPF: ${member.cpf}
+Status: ${member.status}
+Membro desde: ${member.since}
+Telefone: ${member.phone}
+Email: ${member.email}
+Data de Nascimento: ${member.birthDate}
+Endereço: ${member.address}
+Instagram: ${member.instagram || 'Não informado'}
+Facebook: ${member.facebook || 'Não informado'}
+                `;
+                alert(details);
+            }
+        }
+
+        function editMember(memberId) {
+            const member = members.find(m => m.id === memberId);
+            if (member) {
+                alert(`Editando dados de ${member.name}\n\nEm uma implementação real, abriria um formulário de edição.`);
+            }
+        }
+
+        function approveMember(memberId) {
+            const member = members.find(m => m.id === memberId);
+            if (member && member.status === 'pendente') {
+                member.status = 'adimplente';
+                localStorage.setItem('members', JSON.stringify(members));
+                
+                updateMembersTable();
+                updatePendingTable();
+                updateOverdueTable();
+                updateStats();
+                initializeChart();
+                
+                showNotification(`Cadastro de ${member.name} aprovado com sucesso!`, 'success');
+            }
+        }
+
+        function approveAllPending() {
+            const pendingMembers = members.filter(m => m.status === 'pendente');
+            if (pendingMembers.length === 0) {
+                showNotification('Não há cadastros pendentes para aprovar.', 'info');
+                return;
+            }
+            
+            if (confirm(`Deseja aprovar todos os ${pendingMembers.length} cadastros pendentes?`)) {
+                pendingMembers.forEach(member => {
+                    member.status = 'adimplente';
+                });
+                
+                localStorage.setItem('members', JSON.stringify(members));
+                
+                updateMembersTable();
+                updatePendingTable();
+                updateOverdueTable();
+                updateStats();
+                initializeChart();
+                
+                showNotification(`Todos os ${pendingMembers.length} cadastros pendentes foram aprovados!`, 'success');
+            }
+        }
+
+        function rejectMember(memberId) {
+            const member = members.find(m => m.id === memberId);
+            if (member && member.status === 'pendente') {
+                if (confirm(`Tem certeza que deseja reprovar o cadastro de ${member.name}?`)) {
+                    members = members.filter(m => m.id !== memberId);
+                    localStorage.setItem('members', JSON.stringify(members));
+                    
+                    updateMembersTable();
+                    updatePendingTable();
+                    updateOverdueTable();
+                    updateStats();
+                    initializeChart();
+                    
+                    showNotification(`Cadastro de ${member.name} reprovado.`, 'info');
+                }
+            }
+        }
+
+        function confirmMemberPayment(memberId) {
+            const member = members.find(m => m.id === memberId);
+            if (member && member.status === 'inadimplente') {
+                // Marcar todas as mensalidades atrasadas como pagas
+                if (member.dues) {
+                    member.dues.forEach(due => {
+                        if (due.status === 'atrasado') {
+                            due.status = 'pago';
+                        }
+                    });
+                }
+                
+                // Atualizar status do membro
+                member.status = 'adimplente';
+                localStorage.setItem('members', JSON.stringify(members));
+                
+                updateMembersTable();
+                updatePendingTable();
+                updateOverdueTable();
+                updateStats();
+                initializeChart();
+                
+                showNotification(`Pagamentos de ${member.name} confirmados e status atualizado para adimplente.`, 'success');
+            }
+        }
+
+        function sendReminders() {
+            const overdueMembers = members.filter(m => m.status === 'inadimplente');
+            if (overdueMembers.length === 0) {
+                showNotification('Não há sócios inadimplentes para enviar lembretes.', 'info');
+                return;
+            }
+            
+            showNotification(`Lembretes enviados para ${overdueMembers.length} sócios inadimplentes.`, 'success');
+        }
+
+        function sendRemindersOverdue() {
+            sendReminders();
+        }
+
+        function sendMemberReminder(memberId) {
+            const member = members.find(m => m.id === memberId);
+            if (member) {
+                showNotification(`Lembrete enviado para ${member.name}.`, 'success');
+            }
+        }
+
+        function generateReport() {
+            const reportType = document.getElementById('reportType').value;
+            const exportFormat = document.getElementById('exportFormat').value;
+            
+            let reportMembers = [];
+            
+            switch (reportType) {
+                case 'voting':
+                    reportMembers = members.filter(m => m.status === 'adimplente');
+                    break;
+                case 'all':
+                    reportMembers = members;
+                    break;
+                case 'active':
+                    reportMembers = members.filter(m => m.status === 'adimplente');
+                    break;
+                case 'overdue':
+                    reportMembers = members.filter(m => m.status === 'inadimplente');
+                    break;
+                case 'pending':
+                    reportMembers = members.filter(m => m.status === 'pendente');
+                    break;
+                case 'financial':
+                    // Relatório financeiro - exemplo simplificado
+                    const totalRecebido = members.reduce((total, member) => {
+                        if (member.dues) {
+                            return total + member.dues
+                                .filter(d => d.status === 'pago')
+                                .reduce((sum, due) => sum + due.value, 0);
+                        }
+                        return total;
+                    }, 0);
+                    
+                    const totalPendente = members.reduce((total, member) => {
+                        if (member.dues) {
+                            return total + member.dues
+                                .filter(d => d.status === 'pendente' || d.status === 'atrasado')
+                                .reduce((sum, due) => sum + due.value, 0);
+                        }
+                        return total;
+                    }, 0);
+                    
+                    alert(`Relatório Financeiro:\nTotal Recebido: R$ ${totalRecebido.toFixed(2)}\nTotal Pendente: R$ ${totalPendente.toFixed(2)}`);
+                    return;
+            }
+            
+            showNotification(`Relatório gerado com ${reportMembers.length} sócios. Formato: ${exportFormat.toUpperCase()}`, 'info');
+        }
+
+        function editProfile() {
+            alert('Abrindo edição de perfil...\n\nEm uma implementação real, abriria um formulário de edição.');
+        }
+
+        function addMember() {
+            document.getElementById('registerModal').style.display = 'flex';
+        }
+
+        function importSpreadsheet() {
+            document.getElementById('importModal').style.display = 'flex';
+        }
+
+        function downloadCard() {
+            showNotification('Download da carteirinha iniciado...', 'info');
+            // Em uma implementação real, geraria um PDF da carteirinha
+        }
+
+        function refreshCard() {
+            showNotification('Carteirinha atualizada!', 'success');
+        }
+
+        function copyPix() {
+            navigator.clipboard.writeText(systemSettings.pixKey)
+                .then(() => showNotification('Chave PIX copiada para a área de transferência!', 'success'))
+                .catch(() => showNotification('Erro ao copiar chave PIX.', 'error'));
+        }
+
+        function contactWhatsApp() {
+            window.open(`https://wa.me/${systemSettings.whatsappNumber.replace(/\D/g, '')}`, '_blank');
+        }
+
+        function contactEmail() {
+            window.location.href = 'mailto:contato@mocidadedigital.com';
+        }
+
+        function showDuesHistory() {
+            alert('Abrindo histórico completo de mensalidades...');
+            // Em uma implementação real, mostraria um modal com histórico
+        }
+
+        function helpPayment() {
+            alert(`Para ajuda com pagamento, entre em contato com a secretaria pelo WhatsApp: ${systemSettings.whatsappNumber}`);
+        }
+
+        function loadSettings() {
+            document.getElementById('monthlyDueValue').value = systemSettings.monthlyDueValue;
+            document.getElementById('dueDateDay').value = systemSettings.dueDateDay;
+            document.getElementById('pixKey').value = systemSettings.pixKey;
+            document.getElementById('whatsappNumber').value = systemSettings.whatsappNumber;
+        }
+
+        function saveSettings() {
+            systemSettings.monthlyDueValue = parseFloat(document.getElementById('monthlyDueValue').value);
+            systemSettings.dueDateDay = parseInt(document.getElementById('dueDateDay').value);
+            systemSettings.pixKey = document.getElementById('pixKey').value;
+            systemSettings.whatsappNumber = document.getElementById('whatsappNumber').value;
+            
+            localStorage.setItem('systemSettings', JSON.stringify(systemSettings));
+            updateContactInfo();
+            showNotification('Configurações salvas com sucesso!', 'success');
+        }
+
+        function updateContactInfo() {
+            document.getElementById('pixKeyDisplay').textContent = systemSettings.pixKey;
+            document.getElementById('whatsappNumberDisplay').textContent = systemSettings.whatsappNumber;
+            document.getElementById('contactWhatsAppNumber').textContent = systemSettings.whatsappNumber;
+        }
+
+        function handlePhotoUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('photoPreview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    document.querySelector('.photo-upload .placeholder').style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function setupDragAndDrop() {
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                fileUploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                fileUploadArea.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                fileUploadArea.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                fileUploadArea.classList.add('dragover');
+            }
+            
+            function unhighlight() {
+                fileUploadArea.classList.remove('dragover');
+            }
+            
+            fileUploadArea.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFiles(files);
+            }
+        }
+
+        function handleFileUpload(e) {
+            const files = e.target.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            if (files.length > 0) {
+                const file = files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    // Supondo que a primeira planilha contém os dados
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                    
+                    importData = jsonData.map((row, index) => ({
+                        id: members.length + index + 1,
+                        name: row.Nome || row.name || '',
+                        cpf: row.CPF || row.cpf || '',
+                        email: row.Email || row.email || '',
+                        phone: row.Telefone || row.phone || '',
+                        status: 'pendente',
+                        since: new Date().getFullYear().toString(),
+                        role: 'Sócio',
+                        password: '123456', // Senha padrão
+                        photo: null,
+                        dues: []
+                    }));
+                    
+                    showImportPreview();
+                };
+                
+                reader.readAsArrayBuffer(file);
+            }
+        }
+
+        function showImportPreview() {
+            const previewTable = document.getElementById('previewTable').querySelector('tbody');
+            previewTable.innerHTML = '';
+            
+            importData.forEach(member => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${member.name}</td>
+                    <td>${member.cpf}</td>
+                    <td><span class="status-badge status-pendente">Pendente</span></td>
+                `;
+                previewTable.appendChild(row);
+            });
+            
+            document.getElementById('filePreview').style.display = 'block';
+        }
+
+        function confirmImport() {
+            if (importData.length === 0) {
+                showNotification('Nenhum dado para importar.', 'error');
+                return;
+            }
+            
+            // Adicionar novos membros
+            importData.forEach(newMember => {
+                // Verificar se CPF já existe
+                if (!members.find(m => m.cpf === newMember.cpf)) {
+                    members.push(newMember);
+                }
+            });
+            
+            localStorage.setItem('members', JSON.stringify(members));
+            
+            // Atualizar interface
+            updateMembersTable();
+            updatePendingTable();
+            updateOverdueTable();
+            updateStats();
+            initializeChart();
+            
+            document.getElementById('importModal').style.display = 'none';
+            document.getElementById('filePreview').style.display = 'none';
+            importData = [];
+            
+            showNotification(`${importData.length} sócios importados com sucesso!`, 'success');
+        }
+
+        function showNotification(message, type) {
+            const notificationArea = document.getElementById('notificationArea');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            notificationArea.appendChild(notification);
+            
+            // Mostrar notificação
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            
+            // Remover notificação após 5 segundos
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
